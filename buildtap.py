@@ -39,9 +39,9 @@ class BuildTAPWindows(object):
         # The installation script has a set of architecture-specific paths.
         # The driver kit build system has a set of architecture-specific parameters.
         # architecture -> build system parameter map
-        self.architecture_platform_map = {"i386": "Win32", "amd64": "x64", "arm64": "arm64"}
+        self.architecture_platform_map = {"amd64": "x64", "arm64": "arm64"}
         # architecture -> build system folder name fragment map
-        self.architecture_platform_folder_map = {"i386": "", "amd64": "x64", "arm64": "arm64"}
+        self.architecture_platform_folder_map = {"amd64": "x64", "arm64": "arm64"}
         # supported arch names, also installation script folder names
         self.architectures_supported = self.architecture_platform_map.keys()
         # Release vs Debug
@@ -110,7 +110,7 @@ class BuildTAPWindows(object):
 
     # copy a file
     def cp(self, src, dest):
-        print("COPY %s %s" % (src, dest))
+        print("Copy \"%s\" -> \"%s\"" % (src, dest))
         shutil.copy2(src, dest)
 
     # make a tarball
@@ -188,9 +188,9 @@ class BuildTAPWindows(object):
             return kv.get(var, '')
         if out_path is None:
             out_path = in_path
-        with open(in_path+'.in') as f:
+        with open(in_path+'.in', encoding="utf-8") as f:
             modtxt = re.sub(self.macro_amper, repfn, f.read())
-        with open(out_path, "w") as f:
+        with open(out_path, "w", encoding="utf-8") as f:
             f.write(modtxt)
 
     # set up configuration files for building tap driver
@@ -304,7 +304,7 @@ class BuildTAPWindows(object):
 
         for f in (os.path.join(self.top, 'COPYING'), os.path.join(self.top, 'COPYRIGHT.GPL')):
             src=open(f, mode='rb')
-            dst.write(src.read()+'\r\n')
+            dst.write(src.read()+b'\r\n')
             src.close()
 
         dst.close()
@@ -321,9 +321,8 @@ class BuildTAPWindows(object):
 
         installer_variables_generator = ("\"-D%s=%s\"" % (k, v) for k, v in kv.items())
 
-        installer_cmd = "\"%s\" -DDEVCON32=%s -DDEVCON64=%s -DDEVCONARM64=%s -DDEVCON_BASENAME=%s %s -DOUTPUT=%s -DIMAGE=%s %s" % \
+        installer_cmd = "\"%s\" -DDEVCON64=%s -DDEVCONARM64=%s -DDEVCON_BASENAME=%s %s -DOUTPUT=%s -DIMAGE=%s %s" % \
                         (self.makensis,
-                         self.tifile_dst(arch="i386"),
                          self.tifile_dst(arch="amd64"),
                          self.tifile_dst(arch="arm64"),
                          'tapinstall.exe',
@@ -341,7 +340,7 @@ class BuildTAPWindows(object):
     def package_msm(self):
         self.config_tap()
         project_file = os.path.join(self.msm, "installer.vcxproj")
-        for arch in ("i386", "amd64", "arm64"): #self.architectures_supported
+        for arch in ("amd64", "arm64"): #self.architectures_supported
             print("***** BUILD MSM arch=%s" % (arch,))
             self.run_ewdk('msbuild.exe %s /t:MSM /p:Configuration=%s /p:Platform=%s' % (
                 project_file,
@@ -419,8 +418,6 @@ class BuildTAPWindows(object):
     def inf2cat(self, arch):
         if arch == "amd64":
             oslist = "Vista_X64,Server2008_X64,Server2008R2_X64,7_X64"
-        elif arch == "i386":
-            oslist = "Vista_X86,Server2008_X86,7_X86"
         elif arch == "arm64":
             oslist = "10_ARM64"
         else:

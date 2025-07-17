@@ -127,16 +127,6 @@ Section /o "TAP Virtual Ethernet Adapter" SecTAP
 		File "${IMAGE}\arm64\OemVista.inf"
 		File "${IMAGE}\arm64\${PRODUCT_TAP_WIN_COMPONENT_ID}.cat"
 		File "${IMAGE}\arm64\${PRODUCT_TAP_WIN_COMPONENT_ID}.sys"
-	${ElseIf} ${RunningX86}
-		DetailPrint "We are running on an x86 32-bit system."
-
-		SetOutPath "$INSTDIR\bin"
-		File "${DEVCON32}"
-
-		SetOutPath "$INSTDIR\driver"
-		File "${IMAGE}\i386\OemVista.inf"
-		File "${IMAGE}\i386\${PRODUCT_TAP_WIN_COMPONENT_ID}.cat"
-		File "${IMAGE}\i386\${PRODUCT_TAP_WIN_COMPONENT_ID}.sys"
 	${Else}
 		DetailPrint "Native architecture not recognized!"
 	${EndIf}
